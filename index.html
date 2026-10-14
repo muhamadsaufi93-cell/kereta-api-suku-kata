@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#8bdcff">
+<title>Kereta Api Suku Kata</title>
+<style>
+:root{--ink:#203454;--sky:#bcecff;--cream:#fffdf4;--pink:#ffb3ca;--yellow:#ffe17a;--green:#a8edbd;--blue:#8bdcff;--purple:#c9baff;--track:#667c70}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,"Trebuchet MS",sans-serif;color:var(--ink);background:linear-gradient(#a9e6ff 0 43%,#e5f8ff 43% 59%,#bdebb1 59% 100%)}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:4px solid #203454;outline-offset:3px}
+button:disabled{cursor:default;opacity:.7}
+.app{max-width:980px;margin:auto;padding:12px}
+header{text-align:center;padding:10px 5px}
+h1{font-size:clamp(1.8rem,5vw,3rem);line-height:1.1;margin:0;color:#164b7d;text-shadow:2px 3px white}
+header p{font-size:1.05rem;font-weight:700;margin:9px 0}
+.panel{background:var(--cream);border:4px solid #fff;border-radius:26px;padding:clamp(14px,3vw,24px);margin:12px 0;box-shadow:0 7px 0 #79b4c7}
+.center{text-align:center}
+h2{margin:4px 0 10px;font-size:clamp(1.4rem,4vw,2rem)}
+.intro{max-width:680px;margin:0 auto 18px;line-height:1.55}
+.levels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:720px;margin:auto}
+.level-card{border:4px solid white;border-radius:22px;padding:18px 12px;min-height:175px;font-weight:800;color:var(--ink);box-shadow:0 5px 0 #c5c5c5}
+.level-card:first-child{background:#a9edc2}.level-card:last-child{background:#ffe17a}
+.level-icon{font-size:3rem;display:block;margin-bottom:8px}
+.level-card span:last-child{display:block;font-size:.98rem;font-weight:600;margin-top:6px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:800}
+.progress-wrap{height:16px;background:#e5e8ef;border-radius:99px;overflow:hidden;margin:10px 0 4px}
+.progress{height:100%;width:0;background:linear-gradient(90deg,#71dca1,#ffe16b);border-radius:99px;transition:width .25s}
+.instruction{text-align:center;font-size:clamp(1.15rem,3.5vw,1.65rem);font-weight:900;margin:12px 0}
+.picture-area{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;min-height:115px}
+.picture{font-size:clamp(4rem,12vw,6.5rem);line-height:1;filter:drop-shadow(0 4px 0 #e4e4e4)}
+.word-hint{font-size:1.05rem;font-weight:800;background:#fff0b8;border-radius:15px;padding:10px 14px;max-width:100%}
+.track-area{position:relative;margin:16px auto 10px;padding:12px 3px 24px;max-width:740px;border-bottom:9px solid var(--track)}
+.track-area:after{content:"";position:absolute;left:0;right:0;bottom:-17px;height:5px;background:repeating-linear-gradient(90deg,var(--track) 0 14px,transparent 14px 28px)}
+.train{display:flex;justify-content:center;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.engine{font-size:clamp(2.4rem,7vw,3.4rem);align-self:center}
+.carriage{background:var(--pink);border:4px solid white;border-radius:17px 17px 12px 12px;min-width:96px;min-height:78px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 5px 0 #d985a0;font-size:clamp(1.65rem,5vw,2.3rem);font-weight:900;padding:8px}
+.carriage:nth-child(3){background:var(--yellow);box-shadow:0 5px 0 #d0ad45}
+.carriage:before,.carriage:after{content:"";position:absolute;bottom:-17px;width:18px;height:18px;background:#46516a;border:3px solid white;border-radius:50%}
+.carriage:before{left:10px}.carriage:after{right:10px}
+.carriage.filled{background:var(--green);box-shadow:0 5px 0 #65b681}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:650px;margin:18px auto 4px}
+.option{border:4px solid white;border-radius:18px;min-height:70px;padding:12px 8px;background:var(--blue);box-shadow:0 5px 0 #5ca7c6;color:#183c64;font-size:clamp(1.35rem,4vw,2rem);font-weight:900}
+.option:nth-child(2){background:var(--yellow);box-shadow:0 5px 0 #d1ad40}
+.option:nth-child(3){background:var(--purple);box-shadow:0 5px 0 #9885d8}
+.option:nth-child(4){background:var(--green);box-shadow:0 5px 0 #69bd87}
+.option:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #789}
+.feedback{min-height:44px;text-align:center;font-size:1.12rem;font-weight:900;padding:10px 4px}
+.controls{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:8px}
+.control{border:3px solid white;border-radius:15px;padding:12px 15px;font-weight:900;box-shadow:0 4px 0 #b5b5b5;min-width:112px}
+.play{background:var(--green)}.pause{background:var(--yellow)}.restart{background:var(--pink)}.audio{background:var(--blue)}.next{background:var(--purple)}
+.control:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 #aaa}
+.small-note{text-align:center;font-size:.92rem;line-height:1.5;margin:12px 0 0}
+.hidden{display:none!important}
+.end-emoji{font-size:4rem;text-align:center}.end-title{text-align:center;font-size:2rem;font-weight:900}.end-copy{text-align:center;font-size:1.1rem;line-height:1.5}
+@media(max-width:540px){.app{padding:8px}.panel{border-radius:20px}.levels{grid-template-columns:1fr}.level-card{min-height:130px}.level-icon{font-size:2.4rem;margin:0}.options{gap:9px}.option{min-height:68px}.carriage{min-width:78px;min-height:72px}.control{flex:1;min-width:92px;padding:11px 7px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>🚂 Kereta Api Suku Kata</h1>
+  <p>Jom cantum suku kata dan baca perkataan! 🌈</p>
+</header>
+
+<section class="panel center" id="startPanel">
+  <h2>Jom mula bermain!</h2>
+  <p class="intro">Pilih tahap yang sesuai. Dengar arahan, pilih suku kata dan bantu kereta api sampai ke destinasi. Kita belajar perlahan-lahan, ya!</p>
+  <div class="levels">
+    <button class="level-card" type="button" data-level="1">
+      <span class="level-icon">🌱🚂</span>
+      Tahap 1: Ikut dan Cantum
+      <span>2 pilihan • bantuan lebih banyak</span>
+    </button>
+    <button class="level-card" type="button" data-level="2">
+      <span class="level-icon">⭐🚂</span>
+      Tahap 2: Pilih dan Susun
+      <span>4 pilihan • cuba sendiri</span>
+    </button>
+  </div>
+  <p class="small-note">💛 Tiada had masa. Salah bukan masalah — kita cuba lagi!</p>
+</section>
+
+<section class="panel hidden" id="gamePanel" aria-live="polite">
+  <div class="topline">
+    <span id="questionCount">Soalan 1 daripada 15</span>
+    <span id="levelLabel">Tahap 1</span>
+    <span id="score">⭐ Bintang: 0</span>
+  </div>
+  <div class="progress-wrap" aria-label="Kemajuan"><div class="progress" id="progress"></div></div>
+  <p class="instruction" id="instruction">Pilih suku kata pertama.</p>
+  <div class="picture-area">
+    <div class="picture" id="picture" role="img" aria-label="Gambar sasaran">⚽</div>
+    <div class="word-hint" id="wordHint">Cari perkataan yang sesuai</div>
+  </div>
+  <div class="track-area">
+    <div class="train">
+      <div class="engine" aria-hidden="true">🚂</div>
+      <div class="carriage" id="car1">?</div>
+      <div class="carriage" id="car2">?</div>
+    </div>
+  </div>
+  <div class="options" id="options" aria-label="Pilihan suku kata"></div>
+  <div class="feedback" id="feedback" role="status" aria-live="polite">Pilih suku kata pertama.</div>
+  <div class="controls">
+    <button class="control play" id="playBtn" type="button">▶ Play</button>
+    <button class="control pause" id="pauseBtn" type="button">⏸ Pause</button>
+    <button class="control audio" id="audioBtn" type="button">🔊 Ulang Audio</button>
+    <button class="control next" id="nextBtn" type="button" disabled>➡ Seterusnya</button>
+    <button class="control restart" id="restartBtn" type="button">↻ Main Semula</button>
+  </div>
+  <p class="small-note">Guru boleh membacakan arahan dan membantu murid memilih.</p>
+</section>
+
+<section class="panel hidden" id="endPanel">
+  <div class="end-emoji">🏆🚂🌟</div>
+  <div class="end-title">Syabas, hebat sekali!</div>
+  <p class="end-copy" id="endCopy"></p>
+  <div class="controls">
+    <button class="control play" id="againBtn" type="button">↻ Main Lagi</button>
+    <button class="control restart" id="homeBtn" type="button">🏠 Pilih Tahap</button>
+  </div>
+</section>
+</div>
+
+<script>
+"use strict";
+
+/*
+  PANDUAN GURU:
+  Semua soalan disimpan dalam array questions di bawah.
+  Setiap soalan mempunyai perkataan, dua suku kata, emoji gambar,
+  pilihan untuk suku kata pertama dan pilihan untuk suku kata kedua.
+  Untuk mengubah soalan, ubah maklumat dalam satu item.
+  Untuk menambah soalan, salin satu item dan ubah perkataan/suku katanya.
+  Emoji boleh diganti dengan simbol atau gambar yang sesuai.
+*/
+const questions = [
+  {word:"bola", syllables:["bo","la"], emoji:"⚽", choices1:["bo","ko"], choices2:["la","ma"]},
+  {word:"foto", syllables:["fo","to"], emoji:"📷", choices1:["fo","so"], choices2:["to","ta"]},
+  {word:"kota", syllables:["ko","ta"], emoji:"🏙️", choices1:["ko","bo"], choices2:["ta","ma"]},
+  {word:"roda", syllables:["ro","da"], emoji:"🛞", choices1:["ro","lo"], choices2:["da","la"]},
+  {word:"soda", syllables:["so","da"], emoji:"🥤", choices1:["so","fo"], choices2:["da","ta"]},
+  {word:"koma", syllables:["ko","ma"], emoji:"💤", choices1:["ko","mo"], choices2:["ma","na"]},
+  {word:"nona", syllables:["no","na"], emoji:"👧", choices1:["no","lo"], choices2:["na","ma"]},
+  {word:"logo", syllables:["lo","go"], emoji:"🏷️", choices1:["lo","ro"], choices2:["go","ko"]},
+  {word:"moto", syllables:["mo","to"], emoji:"🏍️", choices1:["mo","no"], choices2:["to","do"]},
+  {word:"soto", syllables:["so","to"], emoji:"🍲", choices1:["so","bo"], choices2:["to","ta"]},
+  {word:"loya", syllables:["lo","ya"], emoji:"🤢", choices1:["lo","no"], choices2:["ya","la"]},
+  {word:"cota", syllables:["co","ta"], emoji:"🔤", choices1:["co","ko"], choices2:["ta","to"]},
+  {word:"bola", syllables:["bo","la"], emoji:"⚽", choices1:["bo","ro"], choices2:["la","na"]},
+  {word:"foto", syllables:["fo","to"], emoji:"📸", choices1:["fo","mo"], choices2:["to","do"]},
+  {word:"roda", syllables:["ro","da"], emoji:"🎡", choices1:["ro","so"], choices2:["da","ta"]}
+];
+
+const $ = id => document.getElementById(id);
+const startPanel = $("startPanel"), gamePanel = $("gamePanel"), endPanel = $("endPanel");
+let level = 1;
+let questionIndex = 0;
+let score = 0;
+let chosenFirst = null;
+let completed = false;
+let paused = false;
+let started = false;
+let locked = false;
+let activeQuestions = [];
+let voiceAvailable = ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
+
+function shuffle(items){
+  const result = items.slice();
+  for(let i=result.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [result[i],result[j]]=[result[j],result[i]];
+  }
+  return result;
+}
+function speak(text){
+  if(!voiceAvailable || paused) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "ms-MY";
+  utterance.rate = 0.72;
+  utterance.pitch = 1.05;
+  window.speechSynthesis.speak(utterance);
+}
+function stopSpeech(){
+  if(voiceAvailable) window.speechSynthesis.cancel();
+}
+function startGame(selectedLevel){
+  stopSpeech();
+  level = selectedLevel;
+  // Susunan tetap supaya guru boleh merancang latihan: Tahap 1 menggunakan 8 soalan,
+  // Tahap 2 menggunakan 7 soalan. Semua 15 soalan dimainkan dalam satu sesi.
+  activeQuestions = questions.map((q,i)=>({...q, level:i<8?1:2}));
+  if(level===1) activeQuestions = activeQuestions.filter(q=>q.level===1);
+  else activeQuestions = activeQuestions.filter(q=>q.level===2);
+  questionIndex=0;score=0;chosenFirst=null;completed=false;paused=false;started=true;locked=false;
+  startPanel.classList.add("hidden");endPanel.classList.add("hidden");gamePanel.classList.remove("hidden");
+  $("levelLabel").textContent = level===1 ? "🌱 Tahap 1" : "⭐ Tahap 2";
+  $("playBtn").textContent="▶ Play";
+  renderQuestion();
+}
+function renderQuestion(){
+  if(questionIndex>=activeQuestions.length){finishGame();return;}
+  const q=activeQuestions[questionIndex];
+  chosenFirst=null;completed=false;locked=false;
+  $("questionCount").textContent=`Soalan ${questionIndex+1} daripada ${activeQuestions.length}`;
+  $("score").textContent=`⭐ Bintang: ${score}`;
+  $("progress").style.width=`${(questionIndex/activeQuestions.length)*100}%`;
+  $("picture").textContent=q.emoji;
+  $("picture").setAttribute("aria-label","Gambar untuk perkataan "+q.word);
+  $("wordHint").textContent=level===1 ? "Dengar, lihat dan cantum." : "Pilih suku kata yang betul.";
+  $("car1").textContent="?";$("car2").textContent="?";
+  $("car1").classList.remove("filled");$("car2").classList.remove("filled");
+  $("instruction").textContent="Pilih suku kata pertama.";
+  $("feedback").textContent=level===1 ? "Mari kita buat bersama-sama." : "Cuba pilih suku kata yang betul.";
+  $("nextBtn").disabled=true;
+  makeOptions(q.choices1,1);
+  if(!paused) speak("Cari perkataan "+q.word+". Pilih suku kata pertama.");
+}
+function makeOptions(options,position){
+  const q=activeQuestions[questionIndex];
+  const correct=q.syllables[position-1];
+  let choices=options.slice();
+  if(level===2){
+    const distractors = position===1 ? questions.map(x=>x.syllables[0]) : questions.map(x=>x.syllables[1]);
+    const extras=shuffle([...new Set(distractors.filter(s=>s!==correct && !choices.includes(s)))]).slice(0,2);
+    choices=[correct,...extras];
+    // Pastikan tepat empat pilihan apabila data membenarkan.
+    if(choices.length<4){
+      const fallback=["ba","bi","bu","ka","ki","ku","ra","ri"];
+      for(const s of fallback){if(s!==correct&&!choices.includes(s)){choices.push(s);if(choices.length===4)break;}}
+    }
+  }
+  choices=shuffle([...new Set(choices)]);
+  const optionsBox=$("options");optionsBox.innerHTML="";
+  choices.forEach(syllable=>{
+    const btn=document.createElement("button");
+    btn.type="button";btn.className="option";btn.textContent=syllable;
+    btn.setAttribute("aria-label","Suku kata "+syllable);
+    btn.disabled=paused||locked;
+    btn.addEventListener("click",()=>chooseSyllable(syllable,position));
+    optionsBox.appendChild(btn);
+  });
+}
+function chooseSyllable(value,position){
+  if(paused||locked||completed)return;
+  const q=activeQuestions[questionIndex];
+  const correct=q.syllables[position-1];
+  if(value!==correct){
+    $("feedback").textContent="😊 Cuba lagi, ya! Dengar sekali lagi.";
+    speak("Cuba lagi.");
+    return;
+  }
+  if(position===1){
+    chosenFirst=value;
+    $("car1").textContent=value;$("car1").classList.add("filled");
+    $("instruction").textContent="Bagus! Sekarang pilih suku kata kedua.";
+    $("feedback").textContent="⭐ Bagus! Cari suku kata kedua.";
+    makeOptions(q.choices2,2);
+    speak(value+". Bagus! Pilih suku kata kedua.");
+  }else{
+    $("car2").textContent=value;$("car2").classList.add("filled");
+    completed=true;locked=true;score++;
+    $("score").textContent=`⭐ Bintang: ${score}`;
+    $("progress").style.width=`${((questionIndex+1)/activeQuestions.length)*100}%`;
+    $("instruction").textContent="Syabas! Kereta api berjaya!";
+    $("wordHint").textContent=`${q.syllables[0]} + ${q.syllables[1]} = ${q.word}`;
+    $("feedback").textContent=`🌟 Syabas! ${q.syllables[0]} + ${q.syllables[1]} = ${q.word}`;
+    $("options").querySelectorAll("button").forEach(b=>b.disabled=true);
+    $("nextBtn").disabled=false;
+    speak(q.syllables[0]+". "+q.syllables[1]+". "+q.word+". Syabas!");
+  }
+}
+function nextQuestion(){
+  if(!completed||paused)return;
+  stopSpeech();
+  questionIndex++;
+  renderQuestion();
+}
+function togglePause(){
+  if(!started||questionIndex>=activeQuestions.length)return;
+  paused=!paused;
+  if(paused){
+    stopSpeech();
+    $("pauseBtn").textContent="▶ Sambung";
+    $("feedback").textContent="⏸ Permainan dijeda. Tekan Play untuk sambung.";
+    $("options").querySelectorAll("button").forEach(b=>b.disabled=true);
+  }else{
+    $("pauseBtn").textContent="⏸ Pause";
+    $("feedback").textContent=completed?"Syabas! Tekan Seterusnya apabila bersedia.":"Kita sambung. Pilih jawapan apabila bersedia.";
+    $("options").querySelectorAll("button").forEach(b=>b.disabled=locked);
+    speak("Kita sambung bermain.");
+  }
+}
+function playGame(){
+  if(!started){startPanel.classList.remove("hidden");return;}
+  if(paused){togglePause();return;}
+  if(completed){speak("Bagus! Tekan seterusnya untuk sambung.");return;}
+  speak("Mari kita bermain. "+$("instruction").textContent);
+}
+function replay(){
+  stopSpeech();
+  const ok=window.confirm("Main semula dari soalan pertama? Markah akan bermula semula.");
+  if(ok) startGame(level);
+}
+function finishGame(){
+  stopSpeech();paused=false;started=false;
+  gamePanel.classList.add("hidden");endPanel.classList.remove("hidden");
+  $("progress").style.width="100%";
+  $("endCopy").textContent=`Kamu telah mencuba ${activeQuestions.length} soalan dan mendapat ${score} bintang. Terima kasih kerana belajar bersama kereta api!`;
+}
+function home(){
+  stopSpeech();started=false;paused=false;
+  endPanel.classList.add("hidden");gamePanel.classList.add("hidden");startPanel.classList.remove("hidden");
+}
+document.querySelectorAll("[data-level]").forEach(btn=>btn.addEventListener("click",()=>startGame(Number(btn.dataset.level))));
+$("playBtn").addEventListener("click",playGame);
+$("pauseBtn").addEventListener("click",togglePause);
+$("audioBtn").addEventListener("click",()=>{
+  if(paused)return;
+  const q=activeQuestions[questionIndex];if(!q)return;
+  if(completed)speak(q.syllables.join(". ") + ". " + q.word);
+  else speak("Perkataan "+q.word+". "+$("instruction").textContent);
+});
+$("nextBtn").addEventListener("click",nextQuestion);
+$("restartBtn").addEventListener("click",replay);
+$("againBtn").addEventListener("click",()=>startGame(level));
+$("homeBtn").addEventListener("click",home);
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape" && started) togglePause();
+});
+</script>
+</body>
+</html>
